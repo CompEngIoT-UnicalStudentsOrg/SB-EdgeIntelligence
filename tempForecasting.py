@@ -5,7 +5,7 @@ import sklearn as sl
 import numpy as np
 import matplotlib.pyplot as plt
 
-data_path = "C:\\Users\\franc\\PycharmProjects\\iotSystems\\data\\temperature.csv"
+data_path = "data/temperature.csv"
 
 starting_dataset = pd.read_csv(data_path)
 

@@ -3,7 +3,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-data_path = "C:\\Users\\franc\\PycharmProjects\\iotSystems\\data\\humidity.csv"
+
+data_path = "data/humidity.csv"
 
 starting_dataset = pd.read_csv(data_path)
 
