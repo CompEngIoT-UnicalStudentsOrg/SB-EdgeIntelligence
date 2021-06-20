@@ -2,6 +2,19 @@ import tensorflow as tf
 import pandas as pd
 import numpy as np
 
+
+__all__ = ["predict_temperature"]
+
+
+data_path = "data/temperature.csv"
+
+starting_dataset = pd.read_csv(data_path)
+
+cols = ['month', 'day', 'hour', 'minute', 'recnt_Humidity', 'recnt_Temperature', 'Target_Temperature']
+
+model = None
+
+
 def create_dataset(X, y, n_samples):
     X_res, y_res = [], []
     for i in range(len(X) - n_samples):
@@ -11,16 +24,11 @@ def create_dataset(X, y, n_samples):
     return np.array(X_res), np.array(y_res)
 
 
+
 """
 Let's start by loading the dataset into a Pandas Dataframe. 'Year' and 'Second' columns are removed since they've the
 same value for each datapoint. 
 """
-
-data_path = "C:\\Users\\franc\\PycharmProjects\\iotSystems\\data\\temperature.csv"
-
-starting_dataset = pd.read_csv(data_path)
-
-cols = ['month', 'day', 'hour', 'minute', 'recnt_Humidity', 'recnt_Temperature', 'Target_Temperature']
 
 data = starting_dataset[cols]
 
@@ -42,6 +50,7 @@ data['hour_cos'] = np.cos(2 * np.pi * data['hour'] / 23.0)
 
 data['minute_sin'] = np.sin(2 * np.pi * data['minute'] / 50.0)
 data['minute_cos'] = np.cos(2 * np.pi * data['minute'] / 50.0)
+
 
 """
 Now let's normalize the three remaining columns and make each of them having mean == 0 and std_deviation == 1.
@@ -99,7 +108,7 @@ model.add(tf.keras.layers.Dense(1))
 
 model.compile(loss='mean_squared_error', optimizer='adam', metrics=['mean_squared_error'])
 
-history = model.fit(train_x, train_y, batch_size=128, validation_split=0.15, shuffle=False, epochs=100)
+history = model.fit(train_x, train_y, batch_size=128, validation_split=0.15, shuffle=False, epochs=50)
 
 test_loss, test_accuracy = model.evaluate(test_x,test_y)
 print("Loss of the model: "+str(test_loss))
@@ -107,4 +116,29 @@ print("temp std: " + str(target_temp_std))
 print("temp mean: " + str(target_temp_mean))
 model.summary()
 
-# use model.predict(data) to make a prediction
+def normalize_dataset(data):
+    data['month_sin'] = np.sin(2 * np.pi * data['month'] / 12.0)
+    data['month_cos'] = np.cos(2 * np.pi * data['month'] / 12.0)
+
+    data['day_sin'] = np.sin(2 * np.pi * data['day'] / 31.0)
+    data['day_cos'] = np.cos(2 * np.pi * data['day'] / 31.0)
+
+    data['hour_sin'] = np.sin(2 * np.pi * data['hour'] / 23.0)
+    data['hour_cos'] = np.cos(2 * np.pi * data['hour'] / 23.0)
+
+    data['minute_sin'] = np.sin(2 * np.pi * data['minute'] / 50.0)
+    data['minute_cos'] = np.cos(2 * np.pi * data['minute'] / 50.0)
+
+    data['norm_recnt_hum'] = (data['recnt_Humidity'] - recnt_hum_mean) / recnt_hum_std
+    data['norm_recnt_temp'] = (data['recnt_Temperature'] - recnt_temp_mean) / recnt_temp_std
+    data['norm_target_temp'] = (data['Target_Temperature'] - target_temp_mean) / target_temp_std
+
+
+def predict_temperature(rows):
+    if model:
+        df = pd.DataFrame(np.array(rows), columns=cols)
+        normalize_dataset(df)
+        df = df[features_cols]
+
+        prediction = model.predict(np.array([df.to_numpy()]))
+        return (float(prediction[0][0]) * target_temp_std) + target_temp_mean 
