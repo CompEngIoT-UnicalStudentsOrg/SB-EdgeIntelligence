@@ -26,7 +26,7 @@ def validate_entry(num_rows: int, rows: list[list[float]]) -> tuple[bool, str]  
         if row_len != elem_per_row:
             return False, f"expected row-#{idx}-length: {elem_per_row}, got {row_len}"
     
-    return True
+    return True, ""
 
 
 def farenheit_to_celsius(temp):
