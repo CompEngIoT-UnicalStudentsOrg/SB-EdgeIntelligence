@@ -16,7 +16,7 @@ hum_input_size = 36
 elem_per_row = 7
 
 
-def validate_entry(num_rows: int, rows: list[list[float]]) -> tuple(bool, str):
+def validate_entry(num_rows: int, rows: list[list[float]]) -> tuple[bool, str]  :
     actual_len = len(rows)
     if actual_len != num_rows:
         return False, f"expected #total-rows: {num_rows}, got {actual_len}"
